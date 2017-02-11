@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-16'
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-annotations:25.1.1'
+}
