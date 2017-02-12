@@ -17,10 +17,10 @@ bool inline isFilled_A8(const void *pixels, int width, int x, int y) {
     return pixel < redTreshold_A8;
 }
 
-/** Return the first x position where there is a substancial amount of fill,
+/** Return the first x position where there is a substantial amount of fill,
  * starting the search from the left. */
 template<typename F>
-int findBorderLeft(F&& func, const void *pixels, int width, int height) {
+int findBorderLeft(F&& func, const void *pixels, int width, int height, int top, int bottom) {
     int x, y;
     const int filledLimit = (int) round(height * filledRatioLimit / 2);
 
@@ -28,7 +28,7 @@ int findBorderLeft(F&& func, const void *pixels, int width, int height) {
     for (x = 0; x < width; x++) {
         int filledCount = 0;
 
-        for (y = 0; y < height; y+=2) {
+        for (y = top; y < bottom; y+=2) {
             if (func(pixels, width, x, y)) {
                 filledCount++;
             }
@@ -44,10 +44,10 @@ int findBorderLeft(F&& func, const void *pixels, int width, int height) {
     return 0;
 }
 
-/** Return the first x position where there is a substancial amount of fill,
+/** Return the first x position where there is a substantial amount of fill,
  * starting the search from the right. */
 template<typename F>
-int findBorderRight(F&& func, const void *pixels, int width, int height) {
+int findBorderRight(F&& func, const void *pixels, int width, int height, int top, int bottom) {
     int x, y;
     const int filledLimit = (int) round(height * filledRatioLimit / 2);
 
@@ -55,7 +55,7 @@ int findBorderRight(F&& func, const void *pixels, int width, int height) {
     for (x = width - 1; x >= 0; x--) {
         int filledCount = 0;
 
-        for (y = 0; y < height; y+=2) {
+        for (y = top; y < bottom; y+=2) {
             if (func(pixels, width, x, y)) {
                 filledCount++;
             }
@@ -71,10 +71,10 @@ int findBorderRight(F&& func, const void *pixels, int width, int height) {
     return width;
 }
 
-/** Return the first y position where there is a substancial amount of fill,
+/** Return the first y position where there is a substantial amount of fill,
  * starting the search from the top. */
 template<typename F>
-int findBorderTop(F&& func, const void *pixels, int width, int height, int left, int right) {
+int findBorderTop(F&& func, const void *pixels, int width, int height) {
     int x, y;
     const int filledLimit = (int) round(width * filledRatioLimit / 2);
 
@@ -82,7 +82,7 @@ int findBorderTop(F&& func, const void *pixels, int width, int height, int left,
     for (y = 0; y < height; y++) {
         int filledCount = 0;
 
-        for (x = left; x < right; x+=2) {
+        for (x = 0; x < width; x+=2) {
             if (func(pixels, width, x, y)) {
                 filledCount++;
             }
@@ -98,10 +98,10 @@ int findBorderTop(F&& func, const void *pixels, int width, int height, int left,
     return 0;
 }
 
-/** Return the first y position where there is a substancial amount of fill,
+/** Return the first y position where there is a substantial amount of fill,
  * starting the search from the bottom. */
 template<typename F>
-int findBorderBottom(F&& func, const void *pixels, int width, int height, int left, int right) {
+int findBorderBottom(F&& func, const void *pixels, int width, int height) {
     int x, y;
     const int filledLimit = (int) round(width * filledRatioLimit / 2);
 
@@ -109,7 +109,7 @@ int findBorderBottom(F&& func, const void *pixels, int width, int height, int le
     for (y = height - 1; y >= 0; y--) {
         int filledCount = 0;
 
-        for (x = left; x < right; x+=2) {
+        for (x = 0; x < width; x+=2) {
             if (func(pixels, width, x, y)) {
                 filledCount++;
             }
@@ -125,38 +125,27 @@ int findBorderBottom(F&& func, const void *pixels, int width, int height, int le
     return height;
 }
 
-Borders findBorders_ARGB_8888(const void *pixels, int width, int height) {
-    int left = findBorderLeft(isFilled_ARGB_8888, pixels, width, height);
-    int right = findBorderRight(isFilled_ARGB_8888, pixels, width, height);
+template<typename F>
+Borders findBorders(F&& func, const void *pixels, int width, int height) {
+    int top = findBorderTop(func, pixels, width, height);
+    int bottom = findBorderBottom(func, pixels, width, height);
 
     return {
-            .left = left,
-            .top = findBorderTop(isFilled_ARGB_8888, pixels, width, height, left, right),
-            .right = right,
-            .bottom = findBorderBottom(isFilled_ARGB_8888, pixels, width, height, left, right)
+            .left = findBorderLeft(func, pixels, width, height, top, bottom),
+            .top = top,
+            .right = findBorderRight(func, pixels, width, height, top, bottom),
+            .bottom = bottom
     };
+}
+
+Borders findBorders_ARGB_8888(const void *pixels, int width, int height) {
+    return findBorders(isFilled_ARGB_8888, pixels, width, height);
 }
 
 Borders findBorders_RGB_565(const void *pixels, int width, int height) {
-    int left = findBorderLeft(isFilled_RGB_565, pixels, width, height);
-    int right = findBorderRight(isFilled_RGB_565, pixels, width, height);
-
-    return {
-            .left = left,
-            .top = findBorderTop(isFilled_RGB_565, pixels, width, height, left, right),
-            .right = right,
-            .bottom = findBorderBottom(isFilled_RGB_565, pixels, width, height, left, right)
-    };
+    return findBorders(isFilled_RGB_565, pixels, width, height);
 }
 
 Borders findBorders_A8(const void *pixels, int width, int height) {
-    int left = findBorderLeft(isFilled_A8, pixels, width, height);
-    int right = findBorderRight(isFilled_A8, pixels, width, height);
-
-    return {
-            .left = left,
-            .top = findBorderTop(isFilled_A8, pixels, width, height, left, right),
-            .right = right,
-            .bottom = findBorderBottom(isFilled_A8, pixels, width, height, left, right)
-    };
+    return findBorders(isFilled_A8, pixels, width, height);
 }
