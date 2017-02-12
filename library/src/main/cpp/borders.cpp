@@ -19,7 +19,7 @@ bool inline isFilled_RGB_565(const void *pixels, int width, int x, int y) {
 
 bool inline isFilled_A8(const void *pixels, int width, int x, int y) {
     const uint8_t pixel = *((uint8_t *)pixels + (y * width + x));
-    return pixel < RED_THREDHOLD_A8;
+    return pixel < RED_THRESHOLD_A8;
 }
 
 /** Return the first x position where there is a substancial amount of fill,

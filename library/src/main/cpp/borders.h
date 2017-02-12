@@ -10,7 +10,7 @@ const float filledRatioLimit = 0.0025;
 #define THRESHOLD 0.5
 
 #define RED_THRESHOLD_RGB_565 (((uint16_t)(31.0 * THRESHOLD)) << (5 + 6))
-#define RED_THREDHOLD_A8 ((uint8_t)(255.0 * THRESHOLD))
+#define RED_THRESHOLD_A8 ((uint8_t)(255.0 * THRESHOLD))
 #define RED_MASK_ARGB_8888 ((uint32_t)(255.0 * THRESHOLD))
 
 struct Borders{
