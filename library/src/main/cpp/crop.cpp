@@ -18,20 +18,20 @@ template<typename T> void cropBitmap(T *pixels, uint32_t sourceWidth,
     delete[] tmpPixels;
 }
 
-void cropBitmap_ARGB_8888(uint32_t *pixels, uint32_t sourceWidth,
+void cropBitmap_ARGB_8888(void *pixels, uint32_t sourceWidth,
                           uint32_t left, uint32_t top, uint32_t width, uint32_t height) {
 
-    cropBitmap(pixels, sourceWidth, left, top, width, height);
+    cropBitmap((uint32_t *)pixels, sourceWidth, left, top, width, height);
 }
 
-void cropBitmap_RGB_565(uint16_t *pixels, uint32_t sourceWidth,
+void cropBitmap_RGB_565(void *pixels, uint32_t sourceWidth,
                         uint32_t left, uint32_t top, uint32_t width, uint32_t height) {
 
-    cropBitmap(pixels, sourceWidth, left, top, width, height);
+    cropBitmap((uint16_t *)pixels, sourceWidth, left, top, width, height);
 }
 
-void cropBitmap_A8(uint8_t *pixels, uint32_t sourceWidth, uint32_t left, uint32_t top,
+void cropBitmap_A8(void *pixels, uint32_t sourceWidth, uint32_t left, uint32_t top,
                    uint32_t width, uint32_t height) {
 
-    cropBitmap(pixels, sourceWidth, left, top, width, height);
+    cropBitmap((uint8_t *)pixels, sourceWidth, left, top, width, height);
 }
