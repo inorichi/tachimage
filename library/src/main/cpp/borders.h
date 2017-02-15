@@ -7,13 +7,14 @@
 /** A line will be considered as having content if 0.25% of it is filled. */
 const float filledRatioLimit = 0.0025;
 
-#define THRESHOLD 0.5
+/** When the threshold is closer to 1, less content will be cropped. **/
+#define THRESHOLD 0.65
 
-#define RED_THRESHOLD_RGB_565 (((uint16_t)(31.0 * THRESHOLD)) << (5 + 6))
-#define RED_THRESHOLD_A8 ((uint8_t)(255.0 * THRESHOLD))
-#define RED_MASK_ARGB_8888 ((uint32_t)(255.0 * THRESHOLD))
+const uint16_t redThreshold_RGB_565 = ((uint16_t)(31.0 * THRESHOLD)) << (5 + 6);
+const uint8_t  redTreshold_RGB_A8888 = (uint8_t)(255.0 * THRESHOLD);
+const uint8_t  redTreshold_A8 = (uint8_t)(255.0 * THRESHOLD);
 
-struct Borders{
+struct Borders {
     int left, top, right, bottom;
 };
 

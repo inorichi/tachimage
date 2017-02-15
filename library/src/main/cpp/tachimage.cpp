@@ -35,7 +35,7 @@ Borders findBorders(void *pixels, int width, int height, int format) {
     } else if (format == ANDROID_BITMAP_FORMAT_A_8) {
         return findBorders_A8(pixels, width, height);
     } else {
-        return { .left = 0, .top = 0, .right = width - 1, .bottom = height - 1 };
+        return { .left = 0, .top = 0, .right = width, .bottom = height };
     }
 }
 

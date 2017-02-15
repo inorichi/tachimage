@@ -7,13 +7,16 @@ template<typename T> void cropBitmap(T *pixels, uint32_t sourceWidth,
     T* whereToGet = pixels + left + top * sourceWidth;
     T* whereToPut = tmpPixels;
 
-    for (int i = top; i < height + top; i++) {
-        memcpy(whereToPut, whereToGet, sizeof(T) * width);
+    uint32_t end = height + top;
+    size_t rowSize = sizeof(T) * width;
+
+    for (uint32_t i = top; i < end; i++) {
+        memcpy(whereToPut, whereToGet, rowSize);
         whereToGet += sourceWidth;
         whereToPut += width;
     }
 
-    memcpy(pixels, tmpPixels, sizeof(T) * width * height);
+    memcpy(pixels, tmpPixels, rowSize * height);
 
     delete[] tmpPixels;
 }

@@ -3,6 +3,7 @@ package eu.kanade.tachimage;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Build;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -10,7 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"unused", "WeakerAccess", "TryWithIdenticalCatches"})
 public class Tachimage {
 
     private static Field bitmapWidthField;
@@ -85,12 +86,13 @@ public class Tachimage {
     }
 
     // Called from native.
+    @Keep
     static void reconfigure(@NonNull Bitmap bitmap, int width, int height) {
         try {
             long bitmapPtr = bitmapNativePtr.getLong(bitmap);
 
-            // Reconfigure is available in android in Kit Kat, but for some reason it breaks the
-            // bitmap and it can't be rendered.
+            // Reconfigure is available since Kit Kat, but for some reason it breaks the bitmap and
+            // it can't be rendered. It seems to be fixed in M.
             if (Build.VERSION.SDK_INT >= 23) {
                 int length = ((byte[]) bitmapBuffer.get(bitmap)).length;
                 int nativeInt = configNativeInt.getInt(bitmap.getConfig());
