@@ -3,22 +3,18 @@
 template<typename T> void cropBitmap(T *pixels, uint32_t sourceWidth,
                                      uint32_t left, uint32_t top, uint32_t width, uint32_t height) {
 
-    T* tmpPixels = new T[width * height];
-    T* whereToGet = pixels + left + top * sourceWidth;
-    T* whereToPut = tmpPixels;
+    T *whereToGet = pixels + left + top * sourceWidth;
+    T *whereToPut = pixels;
 
-    uint32_t end = height + top;
     size_t rowSize = sizeof(T) * width;
 
+    uint32_t end = height + top;
+
     for (uint32_t i = top; i < end; i++) {
-        memcpy(whereToPut, whereToGet, rowSize);
+        memmove(whereToPut, whereToGet, rowSize);
         whereToGet += sourceWidth;
         whereToPut += width;
     }
-
-    memcpy(pixels, tmpPixels, rowSize * height);
-
-    delete[] tmpPixels;
 }
 
 void cropBitmap_ARGB_8888(void *pixels, uint32_t sourceWidth,
