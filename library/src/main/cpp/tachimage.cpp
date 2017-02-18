@@ -46,11 +46,11 @@ Java_eu_kanade_tachimage_Tachimage_nativeFindBorders(JNIEnv *env, jclass type, j
     void *pixels;
 
     if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     Borders b = findBorders(pixels, info.width, info.height, info.format);
