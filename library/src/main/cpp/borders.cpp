@@ -4,7 +4,7 @@ bool inline isFilled_ARGB_8888(const void *pixels, int width, int x, int y) {
     const uint32_t *pixelPtr = (uint32_t *)pixels + (y * width + x);
 
     // In this format, Skia stores the red color in the first byte, regardless of the endianness.
-    return *((uint8_t *)pixelPtr) < redTreshold_RGB_A8888;
+    return *((uint8_t *)pixelPtr) < redThreshold_RGB_A8888;
 }
 
 bool inline isFilled_RGB_565(const void *pixels, int width, int x, int y) {
@@ -14,7 +14,7 @@ bool inline isFilled_RGB_565(const void *pixels, int width, int x, int y) {
 
 bool inline isFilled_A8(const void *pixels, int width, int x, int y) {
     const uint8_t pixel = *((uint8_t *)pixels + (y * width + x));
-    return pixel < redTreshold_A8;
+    return pixel < redThreshold_A8;
 }
 
 /** Return the first x position where there is a substantial amount of fill,

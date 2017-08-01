@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +14,8 @@ import java.lang.reflect.Method;
 
 @SuppressWarnings({"unused", "WeakerAccess", "TryWithIdenticalCatches"})
 public class Tachimage {
+
+    private final static String TAG = "Tachimage";
 
     private static Field bitmapWidthField;
 
@@ -34,24 +37,29 @@ public class Tachimage {
             bitmapHeightField = Bitmap.class.getDeclaredField("mHeight");
             bitmapNativePtr = Bitmap.class.getDeclaredField(Build.VERSION.SDK_INT >= 23 ?
                     "mNativePtr" : "mNativeBitmap");
-            bitmapBuffer = Bitmap.class.getDeclaredField("mBuffer");
             configNativeInt = Bitmap.Config.class.getDeclaredField("nativeInt");
 
             bitmapWidthField.setAccessible(true);
             bitmapHeightField.setAccessible(true);
             bitmapNativePtr.setAccessible(true);
-            bitmapBuffer.setAccessible(true);
             configNativeInt.setAccessible(true);
 
-            if (Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 26) {
+                bitmapNativeReconfigure = Bitmap.class.getDeclaredMethod("nativeReconfigure",
+                        long.class, int.class, int.class, int.class, boolean.class);
+                bitmapNativeReconfigure.setAccessible(true);
+            } else if (Build.VERSION.SDK_INT >= 23) {
                 bitmapNativeReconfigure = Bitmap.class.getDeclaredMethod("nativeReconfigure",
                         long.class, int.class, int.class, int.class, int.class, boolean.class);
+                bitmapBuffer = Bitmap.class.getDeclaredField("mBuffer");
+
                 bitmapNativeReconfigure.setAccessible(true);
+                bitmapBuffer.setAccessible(true);
             }
         } catch (NoSuchFieldException e) {
-            // They exist at least after API 16.
+            Log.e(TAG, e.getMessage());
         } catch (NoSuchMethodException e) {
-            // Reconfigure exists after API 19.
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -64,16 +72,7 @@ public class Tachimage {
         if (bitmap.getWidth() == width && bitmap.getHeight() == height) {
             return false;
         }
-        if (nativeCrop(bitmap, left, top, width, height)) {
-            try {
-                bitmapWidthField.set(bitmap, width);
-                bitmapHeightField.set(bitmap, height);
-            } catch (IllegalAccessException e) {
-                // Shouldn't happen
-            }
-            return true;
-        }
-        return false;
+        return nativeCrop(bitmap, left, top, width, height);
     }
 
     public static boolean cropBitmap(@NonNull Bitmap bitmap, @NonNull Rect rect) {
@@ -91,15 +90,19 @@ public class Tachimage {
         try {
             long bitmapPtr = bitmapNativePtr.getLong(bitmap);
 
+            // Android O removed the reference to the pixels array.
+            if (Build.VERSION.SDK_INT >= 26) {
+                int nativeInt = configNativeInt.getInt(bitmap.getConfig());
+                bitmapNativeReconfigure.invoke(bitmap, bitmapPtr, width, height, nativeInt, false);
+            }
             // Reconfigure is available since Kit Kat, but for some reason it breaks the bitmap and
-            // it can't be rendered. It seems to be fixed in M.
-            if (Build.VERSION.SDK_INT >= 23) {
+            // it can't be rendered. It seems they fixed it in M.
+            else if (Build.VERSION.SDK_INT >= 23) {
                 int length = ((byte[]) bitmapBuffer.get(bitmap)).length;
                 int nativeInt = configNativeInt.getInt(bitmap.getConfig());
                 bitmapNativeReconfigure.invoke(bitmap, bitmapPtr, width, height, nativeInt, length, false);
-                return;
             }
-            if (Build.VERSION.SDK_INT >= 21) {
+            else if (Build.VERSION.SDK_INT >= 21) {
                 nativeChangeSize21(bitmapPtr, width, height);
             } else if (Build.VERSION.SDK_INT >= 18) {
                 nativeChangeSize18(bitmapPtr, width, height);
@@ -109,9 +112,9 @@ public class Tachimage {
             bitmapWidthField.set(bitmap, width);
             bitmapHeightField.set(bitmap, height);
         } catch (IllegalAccessException e) {
-            // Shouldn't happen
+            Log.e(TAG, e.getMessage());
         } catch (InvocationTargetException e) {
-            // Shouldn't happen
+            Log.e(TAG, e.getMessage());
         }
     }
 
